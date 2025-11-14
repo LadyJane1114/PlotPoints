@@ -22,7 +22,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -33,10 +32,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.plotpoints.ui.screens.BookmarksScreen
 import com.example.plotpoints.ui.screens.MapScreen
-import com.example.plotpoints.ui.theme.Pink40
-import com.example.plotpoints.ui.theme.Pink80
+import com.example.plotpoints.ui.theme.BookGreenLight
+
+import com.example.plotpoints.ui.theme.BookGreenPage
+import com.example.plotpoints.ui.theme.CompassFrameMed
+import com.example.plotpoints.ui.theme.GreenText
+
 import com.example.plotpoints.ui.theme.PlotPointsTheme
-import com.example.plotpoints.ui.theme.Purple40
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,8 +63,8 @@ fun DisplayUI() {
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Pink40,
-                    titleContentColor = Color.Black
+                    containerColor = CompassFrameMed,
+                    titleContentColor = GreenText
                 ),
                 title = {
                     Column {
@@ -86,8 +88,8 @@ fun DisplayUI() {
         },
         bottomBar = {
             NavigationBar(
-                containerColor = Pink40,
-                contentColor = Color.Black
+                containerColor = CompassFrameMed,
+                contentColor = GreenText
             ) {
                 NavigationBarItem(
                     label = {
@@ -107,13 +109,13 @@ fun DisplayUI() {
                         navController.navigate("Map")
                     },
                     colors = NavigationBarItemColors(
-                        selectedIconColor = Pink80,
-                        unselectedIconColor = Pink80,
-                        selectedTextColor = Pink80,
-                        unselectedTextColor = Pink80,
-                        selectedIndicatorColor = Purple40,
+                        selectedIconColor = GreenText,
+                        unselectedIconColor = GreenText,
+                        selectedTextColor = GreenText,
+                        unselectedTextColor = GreenText,
+                        selectedIndicatorColor = BookGreenPage,
                         disabledIconColor = Transparent,
-                        disabledTextColor = Pink80,
+                        disabledTextColor = BookGreenLight,
                     )
                 )
                 NavigationBarItem(
@@ -134,13 +136,13 @@ fun DisplayUI() {
                         navController.navigate("Bookmarks")
                     },
                     colors = NavigationBarItemColors(
-                        selectedIconColor = Pink80,
-                        unselectedIconColor = Pink80,
-                        selectedTextColor = Pink80,
-                        unselectedTextColor = Pink80,
-                        selectedIndicatorColor = Purple40,
+                        selectedIconColor = GreenText,
+                        unselectedIconColor = GreenText,
+                        selectedTextColor = GreenText,
+                        unselectedTextColor = GreenText,
+                        selectedIndicatorColor = BookGreenPage,
                         disabledIconColor = Transparent,
-                        disabledTextColor = Pink80,
+                        disabledTextColor = BookGreenLight,
                     )
                 )
             }

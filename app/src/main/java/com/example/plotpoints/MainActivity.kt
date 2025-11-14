@@ -103,9 +103,9 @@ fun DisplayUI() {
                             modifier = Modifier.size(40.dp)
                         )
                     },
-                    selected = selectedItem == 1,
+                    selected = selectedItem == 0,
                     onClick = {
-                        selectedItem = 1
+                        selectedItem = 0
                         navController.navigate("Map")
                     },
                     colors = NavigationBarItemColors(
@@ -130,9 +130,9 @@ fun DisplayUI() {
                             modifier = Modifier.size(40.dp)
                         )
                     },
-                    selected = selectedItem == 0,
+                    selected = selectedItem == 1,
                     onClick = {
-                        selectedItem = 0
+                        selectedItem = 1
                         navController.navigate("Bookmarks")
                     },
                     colors = NavigationBarItemColors(

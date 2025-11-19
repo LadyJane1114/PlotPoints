@@ -1,9 +1,15 @@
 package com.example.plotpoints
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,15 +23,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -33,18 +42,47 @@ import androidx.navigation.compose.rememberNavController
 import com.example.plotpoints.ui.screens.BookmarksScreen
 import com.example.plotpoints.ui.screens.MapScreen
 import com.example.plotpoints.ui.theme.BookGreenLight
-
 import com.example.plotpoints.ui.theme.BookGreenPage
 import com.example.plotpoints.ui.theme.CompassFrameMed
 import com.example.plotpoints.ui.theme.GreenText
-
 import com.example.plotpoints.ui.theme.PlotPointsTheme
+import kotlin.getValue
+
 
 class MainActivity : ComponentActivity() {
+
+    private val mainViewModel: MainViewModel by viewModels()
+    val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission())
+    { isGranted ->
+        if (isGranted) {
+            Log.i("TESTING", "New permission granted by user, proceed...")
+        } else {
+            Log.i("TESTING", "Permission DENIED by user! Display toast...")
+
+            Toast.makeText(
+                this,
+                "Please enable location permission in Settings to use this feature.",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val context = LocalContext.current
+
+            // Check if permission granted
+            LaunchedEffect(Unit) {
+                if (ContextCompat.checkSelfPermission(context,Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED
+                ) {
+                    Log.i("TESTING", "Permission previously granted, proceed...")
+                } else {
+                    Log.i("TESTING", "Permission not yet granted, launching permission request...")
+                    requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                }
+            }
             PlotPointsTheme {
                 DisplayUI()
             }

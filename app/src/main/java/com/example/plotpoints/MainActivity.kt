@@ -39,13 +39,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.compose.PlotPointsTheme
+import com.example.compose.onPrimaryContainerLight
+import com.example.compose.onPrimaryLight
+import com.example.compose.onSecondaryLight
+import com.example.compose.primaryContainerLight
+import com.example.compose.secondaryContainerLight
+import com.example.compose.surfaceVariantLight
 import com.example.plotpoints.ui.screens.BookmarksScreen
 import com.example.plotpoints.ui.screens.MapScreen
-import com.example.plotpoints.ui.theme.BookGreenLight
-import com.example.plotpoints.ui.theme.BookGreenPage
-import com.example.plotpoints.ui.theme.CompassFrameMed
-import com.example.plotpoints.ui.theme.GreenText
-import com.example.plotpoints.ui.theme.PlotPointsTheme
 import kotlin.getValue
 
 
@@ -101,8 +103,8 @@ fun DisplayUI() {
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = CompassFrameMed,
-                    titleContentColor = GreenText
+                    containerColor = primaryContainerLight,
+                    titleContentColor = onPrimaryContainerLight
                 ),
                 title = {
                     Column {
@@ -126,8 +128,8 @@ fun DisplayUI() {
         },
         bottomBar = {
             NavigationBar(
-                containerColor = CompassFrameMed,
-                contentColor = GreenText
+                containerColor = primaryContainerLight,
+                contentColor = onPrimaryContainerLight
             ) {
                 NavigationBarItem(
                     label = {
@@ -147,13 +149,13 @@ fun DisplayUI() {
                         navController.navigate("Map")
                     },
                     colors = NavigationBarItemColors(
-                        selectedIconColor = GreenText,
-                        unselectedIconColor = GreenText,
-                        selectedTextColor = GreenText,
-                        unselectedTextColor = GreenText,
-                        selectedIndicatorColor = BookGreenPage,
+                        selectedIconColor = onPrimaryContainerLight,
+                        unselectedIconColor = onPrimaryContainerLight,
+                        selectedTextColor = onPrimaryContainerLight,
+                        unselectedTextColor = onPrimaryContainerLight,
+                        selectedIndicatorColor = surfaceVariantLight,
                         disabledIconColor = Transparent,
-                        disabledTextColor = BookGreenLight,
+                        disabledTextColor = surfaceVariantLight,
                     )
                 )
                 NavigationBarItem(
@@ -174,13 +176,13 @@ fun DisplayUI() {
                         navController.navigate("Bookmarks")
                     },
                     colors = NavigationBarItemColors(
-                        selectedIconColor = GreenText,
-                        unselectedIconColor = GreenText,
-                        selectedTextColor = GreenText,
-                        unselectedTextColor = GreenText,
-                        selectedIndicatorColor = BookGreenPage,
+                        selectedIconColor = onPrimaryContainerLight,
+                        unselectedIconColor = onPrimaryContainerLight,
+                        selectedTextColor = onPrimaryContainerLight,
+                        unselectedTextColor = onPrimaryContainerLight,
+                        selectedIndicatorColor = surfaceVariantLight,
                         disabledIconColor = Transparent,
-                        disabledTextColor = BookGreenLight,
+                        disabledTextColor = surfaceVariantLight,
                     )
                 )
             }

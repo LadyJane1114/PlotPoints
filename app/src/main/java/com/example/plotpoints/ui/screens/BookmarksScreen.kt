@@ -16,10 +16,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.compose.onSecondaryContainerLight
+import com.example.compose.outlineLight
+import com.example.compose.secondaryContainerLight
+import com.example.compose.secondaryLight
+import com.example.compose.surfaceVariantLight
 import com.example.plotpoints.R
-import com.example.plotpoints.ui.theme.BookGreenMedDark
-import com.example.plotpoints.ui.theme.CompassFrameHighlight
-import com.example.plotpoints.ui.theme.GreenText
+
 
 
 
@@ -29,14 +32,14 @@ fun BookmarksScreen (){
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .background(CompassFrameHighlight)
+            .background(surfaceVariantLight)
     ) {
         Spacer(modifier = Modifier.height(20.dp))
 
         Text (
             text = "More features coming soon!",
             fontSize = 30.sp,
-            color = GreenText,
+            color = onSecondaryContainerLight,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -45,7 +48,7 @@ fun BookmarksScreen (){
             painter = painterResource(id = R.drawable.logo_pp_round),
             contentDescription = "PlotPoints Logo",
             modifier = Modifier
-                .border(1.dp, BookGreenMedDark, shape = CircleShape)
+                .border(1.dp, outlineLight, shape = CircleShape)
         )
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemColors
@@ -40,12 +41,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.compose.PlotPointsTheme
-import com.example.compose.onPrimaryContainerLight
-import com.example.compose.onPrimaryLight
-import com.example.compose.onSecondaryLight
-import com.example.compose.primaryContainerLight
-import com.example.compose.secondaryContainerLight
-import com.example.compose.surfaceVariantLight
 import com.example.plotpoints.ui.screens.BookmarksScreen
 import com.example.plotpoints.ui.screens.MapScreen
 import kotlin.getValue
@@ -103,8 +98,8 @@ fun DisplayUI() {
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = primaryContainerLight,
-                    titleContentColor = onPrimaryContainerLight
+                    containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primaryContainer
                 ),
                 title = {
                     Column {
@@ -119,17 +114,14 @@ fun DisplayUI() {
                             Text(it,
                                 fontSize = 32.sp)
                         }
-//                        Text ( LOCATION GOES HERE??,
-//                            fontSize = 22.sp,
-//                            modifier = Modifier.padding(5.dp))
                     }
                 }
             )
         },
         bottomBar = {
             NavigationBar(
-                containerColor = primaryContainerLight,
-                contentColor = onPrimaryContainerLight
+                containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                contentColor = MaterialTheme.colorScheme.primaryContainer
             ) {
                 NavigationBarItem(
                     label = {
@@ -149,13 +141,13 @@ fun DisplayUI() {
                         navController.navigate("Map")
                     },
                     colors = NavigationBarItemColors(
-                        selectedIconColor = onPrimaryContainerLight,
-                        unselectedIconColor = onPrimaryContainerLight,
-                        selectedTextColor = onPrimaryContainerLight,
-                        unselectedTextColor = onPrimaryContainerLight,
-                        selectedIndicatorColor = surfaceVariantLight,
+                        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        unselectedIconColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedTextColor = MaterialTheme.colorScheme.primaryContainer,
+                        unselectedTextColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedIndicatorColor = MaterialTheme.colorScheme.onSecondary,
                         disabledIconColor = Transparent,
-                        disabledTextColor = surfaceVariantLight,
+                        disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
                 )
                 NavigationBarItem(
@@ -176,13 +168,13 @@ fun DisplayUI() {
                         navController.navigate("Bookmarks")
                     },
                     colors = NavigationBarItemColors(
-                        selectedIconColor = onPrimaryContainerLight,
-                        unselectedIconColor = onPrimaryContainerLight,
-                        selectedTextColor = onPrimaryContainerLight,
-                        unselectedTextColor = onPrimaryContainerLight,
-                        selectedIndicatorColor = surfaceVariantLight,
+                        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        unselectedIconColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedTextColor = MaterialTheme.colorScheme.primaryContainer,
+                        unselectedTextColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedIndicatorColor = MaterialTheme.colorScheme.onSecondary,
                         disabledIconColor = Transparent,
-                        disabledTextColor = surfaceVariantLight,
+                        disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
                 )
             }

@@ -91,93 +91,101 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun DisplayUI() {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
     var selectedItem by remember { mutableIntStateOf(0)
     }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primaryContainer
-                ),
-                title = {
-                    Column {
-                        val navBackStackEntry by navController.currentBackStackEntryAsState()
-                        val currentDestination = navBackStackEntry?.destination?.route
-                        val title = when (currentDestination) {
-                            "Map" -> "Map"
-                            "Bookmarks" -> "Bookmarks"
-                            else -> null
-                        }
-                        title?.let{
-                            Text(it,
-                                fontSize = 32.sp)
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.primaryContainer
+                    ),
+                    title = {
+                        Column {
+                            val navBackStackEntry by navController.currentBackStackEntryAsState()
+                            val currentDestination = navBackStackEntry?.destination?.route
+                            val title = when (currentDestination) {
+                                "Map" -> "Map"
+                                "Bookmarks" -> "Bookmarks"
+                                else -> null
+                            }
+                            title?.let {
+                                Text(
+                                    it,
+                                    fontSize = 32.sp
+                                )
+                            }
                         }
                     }
-                }
-            )
+                )
         },
         bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                contentColor = MaterialTheme.colorScheme.primaryContainer
-            ) {
-                NavigationBarItem(
-                    label = {
-                        Text("Map",
-                            fontSize = 18.sp)
-                    },
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.nav_map),
-                            contentDescription = "Map Icon",
-                            modifier = Modifier.size(40.dp)
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    contentColor = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    NavigationBarItem(
+                        label = {
+                            Text(
+                                "Map",
+                                fontSize = 18.sp
+                            )
+                        },
+                        icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.nav_map),
+                                contentDescription = "Map Icon",
+                                modifier = Modifier.size(40.dp)
+                            )
+                        },
+                        selected = selectedItem == 0,
+                        onClick = {
+                            selectedItem = 0
+                            navController.navigate("Map")
+                        },
+                        colors = NavigationBarItemColors(
+                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedTextColor = MaterialTheme.colorScheme.primaryContainer,
+                            unselectedTextColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedIndicatorColor = MaterialTheme.colorScheme.onSecondary,
+                            disabledIconColor = Transparent,
+                            disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         )
-                    },
-                    selected = selectedItem == 0,
-                    onClick = {
-                        selectedItem = 0
-                        navController.navigate("Map")
-                    },
-                    colors = NavigationBarItemColors(
-                        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        unselectedIconColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedTextColor = MaterialTheme.colorScheme.primaryContainer,
-                        unselectedTextColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedIndicatorColor = MaterialTheme.colorScheme.onSecondary,
-                        disabledIconColor = Transparent,
-                        disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
-                )
-                NavigationBarItem(
-                    label = {
-                        Text("Bookmarks",
-                            fontSize = 18.sp)
-                    },
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.nav_book),
-                            contentDescription = "Pile of Books icon",
-                            modifier = Modifier.size(40.dp)
+                    NavigationBarItem(
+                        label = {
+                            Text(
+                                "Bookmarks",
+                                fontSize = 18.sp
+                            )
+                        },
+                        icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.nav_book),
+                                contentDescription = "Pile of Books icon",
+                                modifier = Modifier.size(40.dp)
+                            )
+                        },
+                        selected = selectedItem == 1,
+                        onClick = {
+                            selectedItem = 1
+                            navController.navigate("Bookmarks")
+                        },
+                        colors = NavigationBarItemColors(
+                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedTextColor = MaterialTheme.colorScheme.primaryContainer,
+                            unselectedTextColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedIndicatorColor = MaterialTheme.colorScheme.onSecondary,
+                            disabledIconColor = Transparent,
+                            disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         )
-                    },
-                    selected = selectedItem == 1,
-                    onClick = {
-                        selectedItem = 1
-                        navController.navigate("Bookmarks")
-                    },
-                    colors = NavigationBarItemColors(
-                        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        unselectedIconColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedTextColor = MaterialTheme.colorScheme.primaryContainer,
-                        unselectedTextColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedIndicatorColor = MaterialTheme.colorScheme.onSecondary,
-                        disabledIconColor = Transparent,
-                        disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
-                )
-            }
+                }
         }
     ) { innerPadding ->
         NavHost(

@@ -31,18 +31,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.compose.onPrimaryContainerLight
-import com.example.compose.onSecondaryContainerLight
-import com.example.compose.onSecondaryLight
-import com.example.compose.onTertiaryLight
-import com.example.compose.primaryLight
-import com.example.compose.surfaceLight
-import com.example.compose.tertiaryContainerLight
+
 import com.example.plotpoints.R
 import com.example.plotpoints.data.SampleData
 import com.example.plotpoints.data.SampleData.PlotPointsSample
 import com.example.plotpoints.models.Features
-import com.mapbox.maps.extension.compose.style.layers.generated.ModelLayer
+
 
 
 @Composable

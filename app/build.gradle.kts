@@ -68,4 +68,7 @@ dependencies {
     implementation("com.mapbox.maps:android-ndk27:11.16.4")
     implementation("com.mapbox.extension:maps-compose-ndk27:11.16.4")
 
+    //Gif splash
+    implementation("androidx.core:core-splashscreen:1.0.0")
+    implementation("com.github.bumptech.glide:glide:4.12.0")
 }

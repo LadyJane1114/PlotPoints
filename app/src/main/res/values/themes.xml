@@ -2,4 +2,10 @@
 <resources>
 
     <style name="Theme.PlotPoints" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/pp_splash_animation</item>
+        <item name="postSplashScreenTheme">@style/Theme.PlotPoints</item>
+    </style>
 </resources>

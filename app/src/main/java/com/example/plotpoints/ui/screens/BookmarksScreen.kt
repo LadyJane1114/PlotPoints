@@ -43,7 +43,7 @@ import com.example.plotpoints.models.Features
 fun BookmarksScreen (){
     Box(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.background)
             .fillMaxWidth()
             .fillMaxHeight(),
         contentAlignment = Alignment.Center
@@ -66,9 +66,9 @@ fun PlotPointDetails (features: Features) {
         contentAlignment = Alignment.Center
     ){
         Row(modifier = Modifier
-            .background(MaterialTheme.colorScheme.onTertiary, RoundedCornerShape(15.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(15.dp))
             .fillMaxWidth(0.9f)
-            .border(1.dp, MaterialTheme.colorScheme.onTertiary, RoundedCornerShape(15.dp))
+            .border(1.dp, MaterialTheme.colorScheme.onPrimaryContainer, RoundedCornerShape(15.dp))
             .padding(12.dp)
             .clickable{isExpanded = !isExpanded}
         )
@@ -78,7 +78,7 @@ fun PlotPointDetails (features: Features) {
                 contentDescription = "Maki Image",
                 modifier = Modifier
                     .size(85.dp)
-                    .background(color = MaterialTheme.colorScheme.tertiaryContainer, RoundedCornerShape(20.dp))
+                    .background(color = MaterialTheme.colorScheme.onPrimaryContainer, RoundedCornerShape(20.dp))
                     .padding(5.dp),
                 alignment = Alignment.Center,
                 contentScale = ContentScale.Fit
@@ -89,13 +89,13 @@ fun PlotPointDetails (features: Features) {
                 Text(
                     text = features.name,
                     fontSize = 28.sp,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = features.address,
                     fontSize = 24.sp,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 AnimatedVisibility(visible = isExpanded) {
@@ -104,7 +104,7 @@ fun PlotPointDetails (features: Features) {
                         Text(
                             text = features.fullAddress,
                             fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
                 }

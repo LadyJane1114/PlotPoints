@@ -100,8 +100,8 @@ fun DisplayUI() {
         topBar = {
                 TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        titleContentColor = MaterialTheme.colorScheme.primaryContainer
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ),
                     title = {
                         Column {
@@ -124,8 +124,8 @@ fun DisplayUI() {
         },
         bottomBar = {
                 NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    contentColor = MaterialTheme.colorScheme.primaryContainer
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ) {
                     NavigationBarItem(
                         label = {
@@ -148,12 +148,12 @@ fun DisplayUI() {
                         },
                         colors = NavigationBarItemColors(
                             selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            unselectedIconColor = MaterialTheme.colorScheme.primaryContainer,
-                            selectedTextColor = MaterialTheme.colorScheme.primaryContainer,
-                            unselectedTextColor = MaterialTheme.colorScheme.primaryContainer,
-                            selectedIndicatorColor = MaterialTheme.colorScheme.onSecondary,
-                            disabledIconColor = Transparent,
-                            disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            unselectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            selectedIndicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                            disabledIconColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledTextColor = MaterialTheme.colorScheme.onPrimary,
                         )
                     )
                     NavigationBarItem(
@@ -177,12 +177,12 @@ fun DisplayUI() {
                         },
                         colors = NavigationBarItemColors(
                             selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            unselectedIconColor = MaterialTheme.colorScheme.primaryContainer,
-                            selectedTextColor = MaterialTheme.colorScheme.primaryContainer,
-                            unselectedTextColor = MaterialTheme.colorScheme.primaryContainer,
-                            selectedIndicatorColor = MaterialTheme.colorScheme.onSecondary,
-                            disabledIconColor = Transparent,
-                            disabledTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            unselectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            selectedIndicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                            disabledIconColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledTextColor = MaterialTheme.colorScheme.onPrimary,
                         )
                     )
                 }

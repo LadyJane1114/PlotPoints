@@ -68,6 +68,14 @@ dependencies {
     implementation("com.mapbox.maps:android-ndk27:11.16.4")
     implementation("com.mapbox.extension:maps-compose-ndk27:11.16.4")
 
+    //Mapbox Searchbox
+    implementation("com.mapbox.search:place-autocomplete-ndk27:2.16.6")
+    implementation("com.mapbox.search:discover-ndk27:2.16.6")
+    implementation("com.mapbox.search:autofill-ndk27:2.16.6")
+    implementation("com.mapbox.search:mapbox-search-android-ui-ndk27:2.16.6")
+    implementation("com.mapbox.search:mapbox-search-android-ndk27:2.16.6")
+
+
     //Gif splash
     implementation("androidx.core:core-splashscreen:1.0.0")
     implementation("com.github.bumptech.glide:glide:4.12.0")

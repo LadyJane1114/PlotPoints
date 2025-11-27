@@ -23,6 +23,8 @@ import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -47,6 +49,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.compose.PlotPointsTheme
 import com.example.plotpoints.ui.screens.BookmarksScreen
 import com.example.plotpoints.ui.screens.MapScreen
+import com.mapbox.maps.extension.style.expressions.dsl.generated.color
 import kotlin.getValue
 
 
@@ -110,14 +113,23 @@ fun DisplayUI() {
                     TopAppBar(
                         colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         ),
                         title = {
                             TextField(
                                 value = searchQuery,
                                 onValueChange = { searchQuery = it },
                                 placeholder = { Text("Search...") },
-                                singleLine = true
+                                singleLine = true,
+                                colors = TextFieldDefaults.colors(
+                                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                    focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    focusedContainerColor = MaterialTheme.colorScheme.background,
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.background
+                                )
                             )
                         },
                         navigationIcon = {
@@ -129,7 +141,8 @@ fun DisplayUI() {
                                     painter = painterResource(R.drawable.search_arrow),
                                     contentDescription = "Back",
                                     modifier = Modifier
-                                        .size(30.dp)
+                                        .size(30.dp),
+                                    tint = MaterialTheme.colorScheme.tertiary
                                 )
                             }
                         },
@@ -151,8 +164,8 @@ fun DisplayUI() {
                 TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ),
                     title = {
                         Text("Map", fontSize = 32.sp)

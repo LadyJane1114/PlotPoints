@@ -15,18 +15,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -97,33 +100,91 @@ fun DisplayUI() {
     val currentRoute = navBackStackEntry?.destination?.route
     var selectedItem by remember { mutableIntStateOf(0)
     }
+    var searchActive by remember {mutableStateOf(false)}
+    var searchQuery by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
+            if (currentRoute == "Map") {
+                if (searchActive) {
+                    TopAppBar(
+                        colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        title = {
+                            TextField(
+                                value = searchQuery,
+                                onValueChange = { searchQuery = it },
+                                placeholder = { Text("Search...") },
+                                singleLine = true
+                            )
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = {
+                                searchActive = false
+                                searchQuery = ""
+                            }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.search_arrow),
+                                    contentDescription = "Back",
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                )
+                            }
+                        },
+                        actions = {
+                            IconButton(onClick = {
+                                //STUFF GOES HERE
+                            }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.search_magnify),
+                                    contentDescription = "Search",
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                )
+                            }
+                        }
+                    )
+            } else {
+                // NORMAL (COLLAPSED) MODE
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+
+                    ),
+                    title = {
+                        Text("Map", fontSize = 32.sp)
+                    },
+                    actions = {
+                        IconButton(onClick = {
+                            searchActive = true
+                        }) {
+                            Icon(
+                                painter = painterResource(R.drawable.search_magnify),
+                                contentDescription = "Search",
+                                modifier = Modifier
+                                    .size(30.dp)
+                            )
+                        }
+                    }
+                )
+            }
+
+            } else {
+                // Bookmarks top bar stays the same
                 TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ),
                     title = {
-                        Column {
-                            val navBackStackEntry by navController.currentBackStackEntryAsState()
-                            val currentDestination = navBackStackEntry?.destination?.route
-                            val title = when (currentDestination) {
-                                "Map" -> "Map"
-                                "Bookmarks" -> "Bookmarks"
-                                else -> null
-                            }
-                            title?.let {
-                                Text(
-                                    it,
-                                    fontSize = 32.sp
-                                )
-                            }
-                        }
+                        Text("Bookmarks", fontSize = 32.sp)
                     }
                 )
-        },
+            }
+                 },
         bottomBar = {
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,

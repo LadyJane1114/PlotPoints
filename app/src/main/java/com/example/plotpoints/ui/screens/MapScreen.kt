@@ -10,16 +10,12 @@ import com.mapbox.maps.extension.compose.MapEffect
 import com.mapbox.maps.plugin.PuckBearing
 import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.search.SearchEngine
 
 
-@Composable
-fun SearchEngine(){
-//need to add this
-}
+
+
 @Composable
 fun MapScreen() {
-    SearchEngine()
 
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {

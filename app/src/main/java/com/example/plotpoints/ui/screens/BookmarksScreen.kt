@@ -41,6 +41,7 @@ import com.example.plotpoints.models.Features
 
 @Composable
 fun BookmarksScreen (){
+
     Box(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)

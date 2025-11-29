@@ -77,6 +77,11 @@ dependencies {
     implementation("com.mapbox.search:mapbox-search-android-ui-ndk27:2.16.6")
     implementation("com.mapbox.search:mapbox-search-android-ndk27:2.16.6")
 
+    //Mapbox Navigation
+    implementation("com.mapbox.navigationcore:android-ndk27:3.17.0-rc.2")
+    implementation("com.mapbox.navigationcore:ui-components-ndk27:3.17.0-rc.2")
+    implementation("com.mapbox.navigationcore:ui-maps-ndk27:3.17.0-rc.2")
+
 
     //Gif splash
     implementation("androidx.core:core-splashscreen:1.0.0")

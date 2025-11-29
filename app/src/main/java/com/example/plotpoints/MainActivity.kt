@@ -313,12 +313,12 @@ fun DisplayUI(mainViewModel: MainViewModel) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(MaterialTheme.colorScheme.surface)
-                                .heightIn(max = 200.dp)
+                                .heightIn(max = 250.dp)
                                 .zIndex(1f)
                         ){
                         items(searchResults) { suggestion ->
                             Text(
-                                text = suggestion.name,
+                                text = "${suggestion.name} - ${suggestion.formattedAddress}",
                                 modifier = Modifier
                                     .padding(8.dp)
                                     .clickable {

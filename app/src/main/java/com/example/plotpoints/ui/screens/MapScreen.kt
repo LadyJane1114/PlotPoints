@@ -35,7 +35,7 @@ fun MapScreen(selectedPlace: PlaceAutocompleteResult?) {
             mapViewportState.easeTo(
                 cameraOptions = CameraOptions.Builder()
                     .center(place.coordinate) // <-- pass the Point, not the whole result
-                    .zoom(18.0)
+                    .zoom(15.0)
                     .build()
             )
         }
@@ -49,8 +49,7 @@ fun MapScreen(selectedPlace: PlaceAutocompleteResult?) {
             point = place.coordinate,
             color = MaterialTheme.colorScheme.tertiary,
             stroke = MaterialTheme.colorScheme.onTertiary,
-            innerColor = MaterialTheme.colorScheme.background,
-            text = selectedPlace.name
+            innerColor = MaterialTheme.colorScheme.background
         )
     }
         MapEffect(Unit) { mapView ->

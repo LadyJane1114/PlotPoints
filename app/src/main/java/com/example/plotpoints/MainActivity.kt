@@ -111,6 +111,7 @@ fun DisplayUI(mainViewModel: MainViewModel) {
     var searchActive by remember {mutableStateOf(false)}
     var searchQuery by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<PlaceAutocompleteSuggestion>>(emptyList()) }
+
     LaunchedEffect(mainViewModel.searchResults) {
         mainViewModel.searchResults.observeForever { results ->
             searchResults = results

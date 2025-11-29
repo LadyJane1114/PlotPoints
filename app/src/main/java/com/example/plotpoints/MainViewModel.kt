@@ -6,11 +6,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mapbox.common.location.LocationProvider
 import com.mapbox.search.autocomplete.PlaceAutocomplete
 import com.mapbox.search.autocomplete.PlaceAutocompleteResult
 import com.mapbox.search.autocomplete.PlaceAutocompleteSuggestion
-import com.mapbox.search.autofill.Query
 import kotlinx.coroutines.launch
 
 

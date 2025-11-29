@@ -1,6 +1,7 @@
 package com.example.plotpoints.ui.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -9,6 +10,7 @@ import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportS
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.extension.compose.MapEffect
+import com.mapbox.maps.extension.compose.annotation.Marker
 import com.mapbox.maps.plugin.PuckBearing
 import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
 import com.mapbox.maps.plugin.locationcomponent.location
@@ -33,7 +35,7 @@ fun MapScreen(selectedPlace: PlaceAutocompleteResult?) {
             mapViewportState.easeTo(
                 cameraOptions = CameraOptions.Builder()
                     .center(place.coordinate) // <-- pass the Point, not the whole result
-                    .zoom(15.0)
+                    .zoom(18.0)
                     .build()
             )
         }
@@ -42,6 +44,15 @@ fun MapScreen(selectedPlace: PlaceAutocompleteResult?) {
         Modifier.fillMaxSize(),
         mapViewportState = mapViewportState,
     ) {
+        selectedPlace?.let { place ->
+        Marker(
+            point = place.coordinate,
+            color = MaterialTheme.colorScheme.tertiary,
+            stroke = MaterialTheme.colorScheme.onTertiary,
+            innerColor = MaterialTheme.colorScheme.background,
+            text = selectedPlace.name
+        )
+    }
         MapEffect(Unit) { mapView ->
             mapView.location.updateSettings {
                 locationPuck = createDefault2DPuck(withBearing = true)

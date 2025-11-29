@@ -10,9 +10,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,23 +28,24 @@ import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.NavHost
@@ -49,7 +55,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.compose.PlotPointsTheme
 import com.example.plotpoints.ui.screens.BookmarksScreen
 import com.example.plotpoints.ui.screens.MapScreen
-import com.mapbox.maps.extension.style.expressions.dsl.generated.color
+import com.mapbox.search.autocomplete.PlaceAutocompleteSuggestion
 import kotlin.getValue
 
 
@@ -89,7 +95,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
             PlotPointsTheme {
-                DisplayUI()
+                DisplayUI(mainViewModel)
             }
         }
     }
@@ -97,14 +103,29 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DisplayUI() {
+fun DisplayUI(mainViewModel: MainViewModel) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    var selectedItem by remember { mutableIntStateOf(0)
-    }
+    var selectedItem by remember { mutableIntStateOf(0) }
     var searchActive by remember {mutableStateOf(false)}
     var searchQuery by remember { mutableStateOf("") }
+    var searchResults by remember { mutableStateOf<List<PlaceAutocompleteSuggestion>>(emptyList()) }
+    LaunchedEffect(mainViewModel.searchResults) {
+        mainViewModel.searchResults.observeForever { results ->
+            searchResults = results
+        }
+    }
+
+    LaunchedEffect(mainViewModel.selectedPlace) {
+        mainViewModel.selectedPlace.observeForever { place ->
+            place?.let {
+                // Navigate to MapScreen or update map marker
+                Log.d("MainActivity", "Selected place: ${it.coordinate}")
+            }
+        }
+    }
+
 
     Scaffold(
         topBar = {
@@ -119,7 +140,13 @@ fun DisplayUI() {
                         title = {
                             TextField(
                                 value = searchQuery,
-                                onValueChange = { searchQuery = it },
+                                onValueChange = { newQuery ->
+                                    searchQuery = newQuery
+                                    if (newQuery.isNotBlank()) {
+                                        mainViewModel.search(newQuery)
+                                    } else {
+                                        searchResults = emptyList()
+                                    } },
                                 placeholder = { Text("Search...") },
                                 singleLine = true,
                                 colors = TextFieldDefaults.colors(
@@ -127,15 +154,16 @@ fun DisplayUI() {
                                     unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                                     focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                     unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    focusedContainerColor = MaterialTheme.colorScheme.background,
-                                    unfocusedContainerColor = MaterialTheme.colorScheme.background
+                                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
                                 )
                             )
                         },
                         navigationIcon = {
                             IconButton(onClick = {
-                                searchActive = false
-                                searchQuery = ""
+                                if(searchQuery.isNotBlank()){
+                                    mainViewModel.searchResults
+                                }
                             }) {
                                 Icon(
                                     painter = painterResource(R.drawable.search_arrow),
@@ -148,7 +176,12 @@ fun DisplayUI() {
                         },
                         actions = {
                             IconButton(onClick = {
-                                //STUFF GOES HERE
+                                searchResults.firstOrNull()?.let { suggestion ->
+                                    mainViewModel.selectSuggestion(suggestion)
+                                    searchQuery = suggestion.name
+                                    searchResults = emptyList()
+                                    searchActive = false
+                                }
                             }) {
                                 Icon(
                                     painter = painterResource(R.drawable.search_magnify),
@@ -186,7 +219,6 @@ fun DisplayUI() {
             }
 
             } else {
-                // Bookmarks top bar stays the same
                 TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -272,11 +304,38 @@ fun DisplayUI() {
         {
             composable("Map")
             {
-                MapScreen()
+
+                MapScreen(selectedPlace = mainViewModel.selectedPlace.observeAsState().value)
+                if (searchResults.isNotEmpty() && searchActive) {
+                    androidx.compose.foundation.lazy
+                        .LazyColumn (
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(MaterialTheme.colorScheme.surface)
+                                .heightIn(max = 200.dp)
+                                .zIndex(1f)
+                        ){
+                        items(searchResults) { suggestion ->
+                            Text(
+                                text = suggestion.name,
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .clickable {
+                                        mainViewModel.selectSuggestion(suggestion)
+                                        searchQuery = suggestion.name
+                                        searchResults = emptyList()
+                                        searchActive = false
+                                    }
+
+                            )
+                        }
+                    }
+                }
             }
             composable("Bookmarks")
             {
                 BookmarksScreen()
             }
-        }}
+        }
+    }
 }

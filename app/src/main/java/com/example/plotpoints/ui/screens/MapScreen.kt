@@ -2,27 +2,40 @@ package com.example.plotpoints.ui.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.geojson.Point
+import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.extension.compose.MapEffect
 import com.mapbox.maps.plugin.PuckBearing
 import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
 import com.mapbox.maps.plugin.locationcomponent.location
-
-
+import com.mapbox.search.autocomplete.PlaceAutocompleteResult
 
 
 @Composable
-fun MapScreen() {
+fun MapScreen(selectedPlace: PlaceAutocompleteResult?) {
+
 
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
-            zoom(2.0)
-            center(Point.fromLngLat(-98.0, 39.5))
+            zoom(7.0)
+            center(Point.fromLngLat(-63.35, 44.65))
             pitch(0.0)
             bearing(0.0)
+        }
+    }
+
+    LaunchedEffect(selectedPlace) {
+        selectedPlace?.let { place ->
+            mapViewportState.easeTo(
+                cameraOptions = CameraOptions.Builder()
+                    .center(place.coordinate) // <-- pass the Point, not the whole result
+                    .zoom(15.0)
+                    .build()
+            )
         }
     }
     MapboxMap(

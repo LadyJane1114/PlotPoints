@@ -20,6 +20,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PlotPoints">
+
+        <meta-data
+            android:name="com.mapbox.maps.token"
+            android:value="pk.eyJ1IjoibGFkeWphbmUxMTE0IiwiYSI6ImNtaHBmczh4eTBsanIyaXB4MTVtdnd2dWoifQ.c0ZtF3Q7UHgujLapGHeEKQ" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

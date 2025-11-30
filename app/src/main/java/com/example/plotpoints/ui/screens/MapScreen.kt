@@ -52,8 +52,8 @@ fun MapScreen(selectedPlace: PlaceAutocompleteResult?,
         selectedPlace?.let { place ->
             mapViewportState.easeTo(
                 cameraOptions = CameraOptions.Builder()
-                    .center(place.coordinate) // <-- pass the Point, not the whole result
-                    .zoom(15.0)
+                    .center(place.coordinate)
+                    .zoom(17.0)
                     .build()
             )
         }

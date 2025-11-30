@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.sp
 
 import com.example.plotpoints.R
 import com.example.plotpoints.data.SampleData
-import com.example.plotpoints.data.SampleData.PlotPointsSample
 import com.example.plotpoints.models.Features
 
 

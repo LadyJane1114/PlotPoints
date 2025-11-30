@@ -127,11 +127,11 @@ fun PlaceCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Button(onClick = onFavoriteToggle) {
-                    Text("Add to Favorites")
+                    Text("Add to Bookmarks")
                 }
 
                 OutlinedButton(onClick = onNavigateClick) {
-                    Text("Navigate")
+                    Text("Show me the Way")
                 }
             }
         }

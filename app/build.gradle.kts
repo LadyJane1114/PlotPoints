@@ -99,4 +99,10 @@ dependencies {
     implementation("androidx.room:room-guava:${room_version}")
     testImplementation("androidx.room:room-testing:${room_version}")
     implementation("androidx.room:room-paging:${room_version}")
+
+    //moshi for converting
+    implementation("com.squareup.moshi:moshi:1.15.0")
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
+    ksp("com.squareup.moshi:moshi-kotlin-codegen:1.15.0")
+
 }

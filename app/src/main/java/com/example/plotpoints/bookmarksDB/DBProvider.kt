@@ -11,6 +11,8 @@ object DBProvider {
             context.applicationContext,
             PPDatabase::class.java,
             "favorites-db"
-        ).build().also { db = it }
+        )
+            .fallbackToDestructiveMigration()
+            .build().also { db = it }
     }
 }

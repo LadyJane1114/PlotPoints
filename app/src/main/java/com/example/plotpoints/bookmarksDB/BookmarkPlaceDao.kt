@@ -14,11 +14,11 @@ interface BookmarkPlaceDao {
     fun getAllBookmarks(): Flow<List<BookmarkPlace>>
 
     @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
-    suspend fun addFavorite(place: BookmarkPlace)
+    suspend fun addBookmark(place: BookmarkPlace)
 
     @Delete
-    suspend fun removeFavorite(place: BookmarkPlace)
+    suspend fun removeBookmark(place: BookmarkPlace)
 
     @Query("SELECT EXISTS(SELECT 1 FROM bookmarks WHERE mapboxID = :id)")
-    suspend fun isFavorite(id: String): Boolean
+    suspend fun isBookmarked(id: String?): Boolean
 }

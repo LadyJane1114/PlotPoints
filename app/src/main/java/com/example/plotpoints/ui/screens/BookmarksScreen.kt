@@ -18,9 +18,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,18 +31,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
 import com.example.plotpoints.R
-import com.example.plotpoints.data.SampleData
-import com.example.plotpoints.models.Features
+import com.example.plotpoints.bookmarksDB.BookmarkPlace
+import com.example.plotpoints.bookmarksDB.DBProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 
 @Composable
 fun BookmarksScreen (){
+    val dao = DBProvider.getDatabase(LocalContext.current).bookmarkPlaceDao()
+    val bookmarksFlow = remember { dao.getAllBookmarks() }
+    val bookmarks by bookmarksFlow.collectAsState(initial = emptyList())
+    val sortedBookmarks = bookmarks.sortedBy { it.name.lowercase() }
+
 
     Box(
         modifier = Modifier
@@ -49,16 +60,21 @@ fun BookmarksScreen (){
         contentAlignment = Alignment.Center
     ){
         LazyColumn() {
-            items(SampleData.PlotPointsSample){
-                feature-> PlotPointDetails(feature)
+            items(sortedBookmarks) { place ->
+                PlotPointDetails(place = place, onRemove = {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        dao.removeBookmark(it)
+                    }
+                })
             }
         }
     }
 }
 
 @Composable
-fun PlotPointDetails (features: Features) {
+fun PlotPointDetails (place: BookmarkPlace, onRemove: (BookmarkPlace) -> Unit) {
     var isExpanded by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -75,7 +91,7 @@ fun PlotPointDetails (features: Features) {
         {
             Image(
                 painterResource(R.drawable.logo_pp_round),
-                contentDescription = "Maki Image",
+                contentDescription = "placeholder image",
                 modifier = Modifier
                     .size(85.dp)
                     .background(color = MaterialTheme.colorScheme.onTertiaryContainer, RoundedCornerShape(20.dp))
@@ -87,25 +103,31 @@ fun PlotPointDetails (features: Features) {
 
             Column {
                 Text(
-                    text = features.name,
+                    text = place.name,
                     fontSize = 28.sp,
                     color = MaterialTheme.colorScheme.onTertiaryContainer
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = features.address,
-                    fontSize = 24.sp,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+
                 AnimatedVisibility(visible = isExpanded) {
                     Column {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = features.fullAddress,
+                            text = place.address ?: "No address",
                             fontSize = 16.sp,
                             color = MaterialTheme.colorScheme.onTertiaryContainer
                         )
+                        Button(
+                            onClick = { onRemove(place) },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                                contentColor = MaterialTheme.colorScheme.onTertiary
+                            )
+                        ) {
+                            Text(
+                                text = "Remove Bookmark",
+                                fontSize = 16.sp
+                            )
+                        }
                     }
                 }
             }

@@ -13,13 +13,17 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.plotpoints.bookmarksDB.BookmarkPlace
+import com.example.plotpoints.bookmarksDB.DBProvider
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.geojson.Point
@@ -30,7 +34,21 @@ import com.mapbox.maps.plugin.PuckBearing
 import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.search.autocomplete.PlaceAutocompleteResult
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import androidx.compose.material3.ButtonDefaults
 
+fun PlaceAutocompleteResult.toBookmarkPlace() = BookmarkPlace(
+    mapboxID = this.id,
+    name = this.name,
+    address = this.address?.formattedAddress,
+    latitude = this.coordinate.latitude(),
+    longitude = this.coordinate.longitude(),
+    makiIcon = this.makiIcon,
+    distanceMeters = this.distanceMeters,
+    etaMinutes = this.etaMinutes,
+)
 
 @Composable
 fun MapScreen(selectedPlace: PlaceAutocompleteResult?,
@@ -84,11 +102,31 @@ fun MapScreen(selectedPlace: PlaceAutocompleteResult?,
             }
         }
 
+
+        val dao = DBProvider.getDatabase(LocalContext.current).bookmarkPlaceDao()
+        val isBookmarked = remember { mutableStateOf(false) }
+
+        LaunchedEffect(selectedPlace?.mapboxId) {
+            selectedPlace?.let {
+                isBookmarked.value = dao.isBookmarked(it.mapboxId)
+            }
+        }
+
         if (selectedPlace != null) {
             PlaceCard(
                 place = selectedPlace,
-                onFavoriteToggle = { onFavoriteToggle(selectedPlace) },
-                onNavigateClick = { onNavigateClick(selectedPlace) },
+                isBookmarked = isBookmarked.value,
+                onFavoriteToggle = { CoroutineScope(Dispatchers.IO).launch {
+                    selectedPlace?.let { place ->
+                        if (isBookmarked.value) {
+                            dao.removeBookmark(place.toBookmarkPlace())
+                        } else {
+                            dao.addBookmark(place.toBookmarkPlace())
+                        }
+                        isBookmarked.value = !isBookmarked.value
+                    }
+                } },
+//                onNavigateClick = { onNavigateClick(selectedPlace) },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(16.dp)
@@ -100,8 +138,9 @@ fun MapScreen(selectedPlace: PlaceAutocompleteResult?,
 @Composable
 fun PlaceCard(
     place: PlaceAutocompleteResult,
+    isBookmarked: Boolean,
     onFavoriteToggle: () -> Unit,
-    onNavigateClick: () -> Unit,
+//    onNavigateClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -126,13 +165,20 @@ fun PlaceCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Button(onClick = onFavoriteToggle) {
-                    Text("Add to Bookmarks")
+                Button(
+                    onClick = onFavoriteToggle,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isBookmarked) MaterialTheme.colorScheme.secondary
+                                            else MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary)
+                    ) {
+                    Text(
+                        if (isBookmarked) "Remove from Bookmarks" else "Add to Bookmarks")
                 }
 
-                OutlinedButton(onClick = onNavigateClick) {
-                    Text("Show me the Way")
-                }
+//                OutlinedButton(onClick = onNavigateClick) {
+//                    Text("Show me the Way!")
+//                }
             }
         }
     }

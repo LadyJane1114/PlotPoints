@@ -12,7 +12,7 @@ object DBProvider {
             PPDatabase::class.java,
             "favorites-db"
         )
-            .fallbackToDestructiveMigration()
+            .fallbackToDestructiveMigration(false)
             .build().also { db = it }
     }
 }

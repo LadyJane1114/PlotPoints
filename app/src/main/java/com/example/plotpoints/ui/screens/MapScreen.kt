@@ -1,5 +1,7 @@
 package com.example.plotpoints.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +40,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
+import com.example.plotpoints.MainViewModel
 
 fun PlaceAutocompleteResult.toBookmarkPlace() = BookmarkPlace(
     mapboxID = this.id,
@@ -51,10 +60,19 @@ fun PlaceAutocompleteResult.toBookmarkPlace() = BookmarkPlace(
 )
 
 @Composable
-fun MapScreen(selectedPlace: PlaceAutocompleteResult?,
+fun MapScreen(
+              selectedPlace: PlaceAutocompleteResult?,
               onFavoriteToggle: (PlaceAutocompleteResult) -> Unit = {},
               onNavigateClick: (PlaceAutocompleteResult) -> Unit = {}
 ) {
+//    val destination by mainViewModel.navigationDestination.observeAsState()
+
+//    LaunchedEffect(destination) {
+//        destination?.let { place ->
+//            startMapboxNavigation(place.coordinate) // your Mapbox navigation function
+//            mainViewModel.clearNavigationDestination() // reset after starting
+//        }
+//    }
 
 
     val mapViewportState = rememberMapViewportState {
@@ -126,7 +144,7 @@ fun MapScreen(selectedPlace: PlaceAutocompleteResult?,
                         isBookmarked.value = !isBookmarked.value
                     }
                 } },
-//                onNavigateClick = { onNavigateClick(selectedPlace) },
+                onNavigateClick = { onNavigateClick(selectedPlace) },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(16.dp)
@@ -140,45 +158,74 @@ fun PlaceCard(
     place: PlaceAutocompleteResult,
     isBookmarked: Boolean,
     onFavoriteToggle: () -> Unit,
-//    onNavigateClick: () -> Unit,
+    onNavigateClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var isExpanded by remember { mutableStateOf(false) }
     Card(
         modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(8.dp)
+        elevation = CardDefaults.cardElevation(8.dp),
     ) {
-        Column(Modifier.padding(16.dp)) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .clickable{isExpanded = !isExpanded},
+            horizontalAlignment = Alignment.CenterHorizontally
 
+        ) {
             Text(
                 text = place.name,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(6.dp))
             place.address?.formattedAddress?.let {
                 Text(
                     text = it,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
                 )
             }
-            Spacer(Modifier.height(16.dp))
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Button(
-                    onClick = onFavoriteToggle,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isBookmarked) MaterialTheme.colorScheme.secondary
-                                            else MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary)
-                    ) {
-                    Text(
-                        if (isBookmarked) "Remove from Bookmarks" else "Add to Bookmarks")
-                }
+            if (!isExpanded) {
+                Text(
+                    text = "Tap for details",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            }
 
-//                OutlinedButton(onClick = onNavigateClick) {
-//                    Text("Show me the Way!")
-//                }
+            AnimatedVisibility(visible = isExpanded) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = "ETA: ${place.etaMinutes} min- Distance: ${place.distanceMeters}m",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Button(
+                        onClick = onFavoriteToggle,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isBookmarked) MaterialTheme.colorScheme.secondary
+                            else MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary)
+                    ) {
+                        Text(
+                            if (isBookmarked) "Remove from Bookmarks" else "Add to Bookmarks")
+                    }
+                    OutlinedButton(onClick = onNavigateClick) {
+                        Text("Show me the Way!")
+                    }
+
+                }
             }
         }
     }

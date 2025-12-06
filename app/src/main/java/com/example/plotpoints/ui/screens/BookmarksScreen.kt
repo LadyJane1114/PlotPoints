@@ -20,6 +20,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,9 +32,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.plotpoints.R
@@ -72,62 +78,82 @@ fun BookmarksScreen (){
 }
 
 @Composable
-fun PlotPointDetails (place: BookmarkPlace, onRemove: (BookmarkPlace) -> Unit) {
+fun PlotPointDetails(place: BookmarkPlace, onRemove: (BookmarkPlace) -> Unit) {
     var isExpanded by remember { mutableStateOf(false) }
 
-    Box(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 5.dp),
-        contentAlignment = Alignment.Center
-    ){
-        Row(modifier = Modifier
-            .background(MaterialTheme.colorScheme.tertiaryContainer, RoundedCornerShape(15.dp))
-            .fillMaxWidth(0.9f)
-            .border(1.dp, MaterialTheme.colorScheme.onTertiaryContainer, RoundedCornerShape(15.dp))
-            .padding(12.dp)
-            .clickable{isExpanded = !isExpanded}
+            .padding(start = 7.dp,top = 5.dp, end = 7.dp, bottom = 5.dp)
+            .border(1.dp, MaterialTheme.colorScheme.onTertiaryContainer,RoundedCornerShape(15.dp)),
+        elevation = CardDefaults.cardElevation(6.dp),
+        shape = RoundedCornerShape(15.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer
         )
-        {
-            Image(
-                painterResource(R.drawable.logo_pp_round),
-                contentDescription = "placeholder image",
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .clickable { isExpanded = !isExpanded },
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = place.name,
+                style = MaterialTheme.typography.titleLarge,
+                fontSize = 28.sp,
+                color = MaterialTheme.colorScheme.onTertiaryContainer,
                 modifier = Modifier
-                    .size(85.dp)
-                    .background(color = MaterialTheme.colorScheme.onTertiaryContainer, RoundedCornerShape(20.dp))
-                    .padding(5.dp),
-                alignment = Alignment.Center,
-                contentScale = ContentScale.Fit
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.width(8.dp))
 
-            Column {
+            if (!isExpanded) {
                 Text(
-                    text = place.name,
-                    fontSize = 28.sp,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                    text = "Tap for details",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
                 )
+            }
 
-                AnimatedVisibility(visible = isExpanded) {
-                    Column {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = place.address ?: "No address",
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
+            AnimatedVisibility(visible = isExpanded) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = place.address ?: "No address",
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "ETA: ${place.etaMinutes} minutes",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "Distance: ${place.distanceMeters}m",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                    Button(
+                        onClick = { onRemove(place) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.tertiary,
+                            contentColor = MaterialTheme.colorScheme.onTertiary
                         )
-                        Button(
-                            onClick = { onRemove(place) },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.tertiary,
-                                contentColor = MaterialTheme.colorScheme.onTertiary
-                            )
-                        ) {
-                            Text(
-                                text = "Remove Bookmark",
-                                fontSize = 16.sp
-                            )
-                        }
+                    ) {
+                        Text(
+                            text = "Remove Bookmark",
+                            fontSize = 16.sp
+                        )
                     }
                 }
             }

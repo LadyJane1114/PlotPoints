@@ -13,9 +13,8 @@ import kotlinx.coroutines.launch
 
 
 class MainViewModel : ViewModel() {
-
+    //Search Items
     val placeAutocomplete = PlaceAutocomplete.create()
-
     private val _searchResults = MutableLiveData<List<PlaceAutocompleteSuggestion>>()
     val searchResults: LiveData<List<PlaceAutocompleteSuggestion>> = _searchResults
 
@@ -38,7 +37,6 @@ class MainViewModel : ViewModel() {
             }
         }
     }
-
     fun selectSuggestion(suggestion: PlaceAutocompleteSuggestion) {
         viewModelScope.launch {
             val selectionResponse = placeAutocomplete.select(suggestion)
@@ -51,5 +49,23 @@ class MainViewModel : ViewModel() {
             }
         }
     }
+    fun clearSearch() {
+        _searchResults.value = emptyList()
+        _selectedPlace.value = null
+    }
+
+
+    //Navigation items
+//    private val _navigationDestination = MutableLiveData<PlaceAutocompleteResult?>()
+//    val navigationDestination: LiveData<PlaceAutocompleteResult?> = _navigationDestination
+//
+//    fun startNavigationTo(place: PlaceAutocompleteResult){
+//        place?.let {
+//            _navigationDestination.value = it
+//        }
+//    }
+//    fun clearNavigationDestination() {
+//        _navigationDestination.value = null
+//    }
 
 }

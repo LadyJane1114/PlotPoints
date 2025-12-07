@@ -56,16 +56,16 @@ class MainViewModel : ViewModel() {
 
 
     //Navigation items
-//    private val _navigationDestination = MutableLiveData<PlaceAutocompleteResult?>()
-//    val navigationDestination: LiveData<PlaceAutocompleteResult?> = _navigationDestination
-//
-//    fun startNavigationTo(place: PlaceAutocompleteResult){
-//        place?.let {
-//            _navigationDestination.value = it
-//        }
-//    }
-//    fun clearNavigationDestination() {
-//        _navigationDestination.value = null
-//    }
+    private val _navigationDestination = MutableLiveData<PlaceAutocompleteResult?>()
+    val navigationDestination: LiveData<PlaceAutocompleteResult?> = _navigationDestination
+
+    fun startNavigationTo(place: PlaceAutocompleteResult){
+        place?.let {
+            _navigationDestination.value = it
+        }
+    }
+    fun clearNavigationDestination() {
+        _navigationDestination.value = null
+    }
 
 }

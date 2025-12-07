@@ -12,7 +12,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -34,7 +33,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -56,13 +54,59 @@ import androidx.navigation.compose.rememberNavController
 import com.example.compose.PlotPointsTheme
 import com.example.plotpoints.ui.screens.BookmarksScreen
 import com.example.plotpoints.ui.screens.MapScreen
+import com.mapbox.common.location.Location
+import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult
+import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
 import com.mapbox.search.autocomplete.PlaceAutocompleteSuggestion
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.getValue
+lateinit var routeLineApi: MapboxRouteLineApi
+lateinit var routeLineView: MapboxRouteLineView
+lateinit var routeLineApiOptions: MapboxRouteLineApiOptions
+lateinit var routeLineViewOptions: MapboxRouteLineViewOptions
 
+
+
+object navigationObserver: MapboxNavigationObserver {
+
+    private val _locationFlow = MutableStateFlow<Location?>(null)
+    val location: Flow<Location?> get() = _locationFlow
+
+    private val locationObserver = object : LocationObserver {
+        override fun onNewRawLocation(rawLocation: Location) {
+            // Optional: handle raw GPS location
+        }
+
+        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+            // locationMatcherResult.enhancedLocation is the snapped/enhanced location
+            _locationFlow.value = locationMatcherResult.enhancedLocation
+        }
+    }
+
+    override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        mapboxNavigation.registerLocationObserver(locationObserver)
+    }
+
+    override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        mapboxNavigation.unregisterLocationObserver(locationObserver)
+    }
+}
 
 class MainActivity : ComponentActivity() {
 
     private val mainViewModel: MainViewModel by viewModels()
+
     val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission())
     { isGranted ->
         if (isGranted) {
@@ -81,6 +125,30 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen()
         enableEdgeToEdge()
+
+        // Initialize MapboxNavigation singleton
+        if (!MapboxNavigationApp.isSetup()) {
+            MapboxNavigationApp.setup {
+                NavigationOptions.Builder(this)
+                    .build()
+            }
+        }
+
+        // Attach LifecycleOwner
+        MapboxNavigationApp.attach(this)
+        // Register your observer
+        MapboxNavigationApp.registerObserver(navigationObserver)
+        // Start trip session
+        MapboxNavigationApp.current()?.startTripSession()
+
+        routeLineApiOptions = MapboxRouteLineApiOptions.Builder().build()
+
+        routeLineViewOptions = MapboxRouteLineViewOptions.Builder(this)
+            .build()
+        routeLineApi = MapboxRouteLineApi(routeLineApiOptions)
+        routeLineView = MapboxRouteLineView(routeLineViewOptions)
+
+
         setContent {
             val context = LocalContext.current
 
@@ -99,6 +167,15 @@ class MainActivity : ComponentActivity() {
                 DisplayUI(mainViewModel)
             }
         }
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        MapboxNavigationApp.current()?.stopTripSession()
+        MapboxNavigationApp.unregisterObserver(navigationObserver)
+        // Detach when activity is destroyed
+        MapboxNavigationApp.detach(this)
+        routeLineApi.cancel()
+        routeLineView.cancel()
     }
 }
 
@@ -314,7 +391,7 @@ fun DisplayUI(mainViewModel: MainViewModel) {
                     }
                 }
 
-                MapScreen(selectedPlace = mainViewModel.selectedPlace.observeAsState().value)
+                MapScreen(mainViewModel = mainViewModel,routeLineApi, routeLineView, selectedPlace = mainViewModel.selectedPlace.observeAsState().value)
                 if (searchResults.isNotEmpty() && searchActive) {
                     androidx.compose.foundation.lazy
                         .LazyColumn (

@@ -85,7 +85,7 @@ fun PlotPointDetails(place: BookmarkPlace, onRemove: (BookmarkPlace) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 7.dp,top = 5.dp, end = 7.dp, bottom = 5.dp)
-            .border(1.dp, MaterialTheme.colorScheme.onTertiaryContainer,RoundedCornerShape(15.dp)),
+            .border(2.dp, MaterialTheme.colorScheme.onTertiaryContainer,RoundedCornerShape(15.dp)),
         elevation = CardDefaults.cardElevation(6.dp),
         shape = RoundedCornerShape(15.dp),
         colors = CardDefaults.cardColors(

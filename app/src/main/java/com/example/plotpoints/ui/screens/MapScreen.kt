@@ -2,10 +2,8 @@ package com.example.plotpoints.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,12 +39,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.example.plotpoints.MainViewModel
+import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
 
 fun PlaceAutocompleteResult.toBookmarkPlace() = BookmarkPlace(
     mapboxID = this.id,
@@ -60,20 +66,14 @@ fun PlaceAutocompleteResult.toBookmarkPlace() = BookmarkPlace(
 )
 
 @Composable
-fun MapScreen(
+fun MapScreen(mainViewModel:MainViewModel,
+              routeLineApi: MapboxRouteLineApi,
+              routeLineView: MapboxRouteLineView,
               selectedPlace: PlaceAutocompleteResult?,
               onFavoriteToggle: (PlaceAutocompleteResult) -> Unit = {},
               onNavigateClick: (PlaceAutocompleteResult) -> Unit = {}
 ) {
-//    val destination by mainViewModel.navigationDestination.observeAsState()
-
-//    LaunchedEffect(destination) {
-//        destination?.let { place ->
-//            startMapboxNavigation(place.coordinate) // your Mapbox navigation function
-//            mainViewModel.clearNavigationDestination() // reset after starting
-//        }
-//    }
-
+    val context = LocalContext.current
 
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
@@ -108,7 +108,6 @@ fun MapScreen(
                     innerColor = MaterialTheme.colorScheme.background
                 )
             }
-
             MapEffect(Unit) { mapView ->
                 mapView.location.updateSettings {
                     locationPuck = createDefault2DPuck(withBearing = true)
@@ -117,6 +116,43 @@ fun MapScreen(
                     puckBearingEnabled = true
                 }
                 mapViewportState.transitionToFollowPuckState()
+
+                val routesObserver = object : RoutesObserver {
+                    override fun onRoutesChanged(result: RoutesUpdatedResult) {
+                        // Ensure the map style is available
+                        mapView.mapboxMap.style?.let { mapStyle ->
+
+                            // Optional: get metadata for alternative routes
+                            val alternativesMetadata = MapboxNavigationApp.current()?.getAlternativeMetadataFor(
+                                result.navigationRoutes
+                            ) ?: emptyList()
+
+                            // Pass the routes to the API
+                            routeLineApi.setNavigationRoutes(
+                                result.navigationRoutes,
+                                alternativesMetadata
+                            ) { routeDrawData ->
+                                // Render the route line on the map
+                                routeLineView.renderRouteDrawData(mapStyle, routeDrawData)
+                            }
+                        }
+                    }
+                }
+                // Register RoutesObserver
+                MapboxNavigationApp.current()?.registerRoutesObserver(routesObserver)
+
+
+                val routeProgressObserver = RouteProgressObserver { routeProgress ->
+                    mapView.mapboxMap.style?.let { mapStyle ->
+                        routeLineApi.updateWithRouteProgress(routeProgress) { result ->
+                            routeLineView.renderRouteLineUpdate(mapStyle, result)
+                        }
+                    }
+                }
+
+                // Register both observers
+                MapboxNavigationApp.current()?.registerRoutesObserver(routesObserver)
+                MapboxNavigationApp.current()?.registerRouteProgressObserver(routeProgressObserver)
             }
         }
 

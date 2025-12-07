@@ -33,6 +33,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -55,10 +56,9 @@ import com.example.compose.PlotPointsTheme
 import com.example.plotpoints.ui.screens.BookmarksScreen
 import com.example.plotpoints.ui.screens.MapScreen
 import com.mapbox.common.location.Location
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -71,6 +71,7 @@ import com.mapbox.search.autocomplete.PlaceAutocompleteSuggestion
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.getValue
+
 lateinit var routeLineApi: MapboxRouteLineApi
 lateinit var routeLineView: MapboxRouteLineView
 lateinit var routeLineApiOptions: MapboxRouteLineApiOptions
@@ -83,16 +84,26 @@ object navigationObserver: MapboxNavigationObserver {
     private val _locationFlow = MutableStateFlow<Location?>(null)
     val location: Flow<Location?> get() = _locationFlow
 
+    private val _locationPoint = MutableStateFlow<Point?>(null)
+    val locationPoint: Flow<Point?> get() = _locationPoint
+
+    private var lastKnownLocation: Location? = null
+
     private val locationObserver = object : LocationObserver {
-        override fun onNewRawLocation(rawLocation: Location) {
-            // Optional: handle raw GPS location
-        }
+        override fun onNewRawLocation(rawLocation: Location) {}
 
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
-            // locationMatcherResult.enhancedLocation is the snapped/enhanced location
-            _locationFlow.value = locationMatcherResult.enhancedLocation
+            lastKnownLocation = locationMatcherResult.enhancedLocation
+
+            _locationFlow.value = lastKnownLocation
+
+            lastKnownLocation?.let { loc ->
+                _locationPoint.value = Point.fromLngLat(loc.longitude, loc.latitude)
+            }
         }
     }
+
+    fun getLastKnownLocation() = lastKnownLocation
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         mapboxNavigation.registerLocationObserver(locationObserver)
@@ -103,6 +114,7 @@ object navigationObserver: MapboxNavigationObserver {
     }
 }
 
+
 class MainActivity : ComponentActivity() {
 
     private val mainViewModel: MainViewModel by viewModels()
@@ -110,6 +122,7 @@ class MainActivity : ComponentActivity() {
     val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission())
     { isGranted ->
         if (isGranted) {
+            startMapboxNavigation()
             Log.i("TESTING", "New permission granted by user, proceed...")
         } else {
             Log.i("TESTING", "Permission DENIED by user! Display toast...")
@@ -134,39 +147,33 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Attach LifecycleOwner
-        MapboxNavigationApp.attach(this)
-        // Register your observer
-        MapboxNavigationApp.registerObserver(navigationObserver)
-        // Start trip session
-        MapboxNavigationApp.current()?.startTripSession()
-
         routeLineApiOptions = MapboxRouteLineApiOptions.Builder().build()
 
         routeLineViewOptions = MapboxRouteLineViewOptions.Builder(this)
             .build()
         routeLineApi = MapboxRouteLineApi(routeLineApiOptions)
         routeLineView = MapboxRouteLineView(routeLineViewOptions)
-
+        // Check location permission
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            startMapboxNavigation()
+        } else {
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
 
         setContent {
-            val context = LocalContext.current
-
-            // Check if permission granted
-            LaunchedEffect(Unit) {
-                if (ContextCompat.checkSelfPermission(context,Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED
-                ) {
-                    Log.i("TESTING", "Permission previously granted, proceed...")
-                } else {
-                    Log.i("TESTING", "Permission not yet granted, launching permission request...")
-                    requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                }
-            }
             PlotPointsTheme {
                 DisplayUI(mainViewModel)
             }
         }
+    }
+    private fun startMapboxNavigation() {
+        MapboxNavigationApp.attach(this)
+        MapboxNavigationApp.registerObserver(navigationObserver)
+        MapboxNavigationApp.current()?.startTripSession()
+
+        Log.i("MainActivity", "Mapbox Navigation started")
     }
     override fun onDestroy() {
         super.onDestroy()
@@ -205,7 +212,8 @@ fun DisplayUI(mainViewModel: MainViewModel) {
         }
     }
 
-
+    val fallbackPoint = Point.fromLngLat(-63.5923, 44.6509)
+    val userPoint by navigationObserver.locationPoint.collectAsState(initial = fallbackPoint)
     Scaffold(
         topBar = {
             if (currentRoute == "Map") {
@@ -391,7 +399,13 @@ fun DisplayUI(mainViewModel: MainViewModel) {
                     }
                 }
 
-                MapScreen(mainViewModel = mainViewModel,routeLineApi, routeLineView, selectedPlace = mainViewModel.selectedPlace.observeAsState().value)
+                MapScreen(
+                    mainViewModel = mainViewModel,
+                    routeLineApi = routeLineApi,
+                    routeLineView = routeLineView,
+                    selectedPlace = mainViewModel.selectedPlace.observeAsState().value,
+                    userLocation = userPoint
+                )
                 if (searchResults.isNotEmpty() && searchActive) {
                     androidx.compose.foundation.lazy
                         .LazyColumn (
@@ -418,6 +432,7 @@ fun DisplayUI(mainViewModel: MainViewModel) {
                     }
                 }
             }
+
             composable("Bookmarks")
             {
                 BookmarksScreen()

@@ -1,5 +1,7 @@
 package com.example.plotpoints.ui.screens
 
+
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -27,7 +29,6 @@ import com.example.plotpoints.bookmarksDB.DBProvider
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.geojson.Point
-import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.extension.compose.MapEffect
 import com.mapbox.maps.extension.compose.annotation.Marker
 import com.mapbox.maps.plugin.PuckBearing
@@ -39,20 +40,32 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.example.plotpoints.MainViewModel
-import com.mapbox.navigation.core.directions.session.RoutesObserver
-import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.example.plotpoints.navigationObserver
+import com.mapbox.maps.extension.compose.style.BooleanValue
+import com.mapbox.maps.extension.compose.style.standard.LightPresetValue
+import com.mapbox.maps.extension.compose.style.standard.MapboxStandardStyle
+import com.mapbox.maps.extension.compose.style.standard.rememberStandardStyleState
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
-import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
-import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
-import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
+import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.location.Location
+import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.MapView
+import com.mapbox.navigation.base.extensions.coordinates
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.NavigationRouterCallback
+import com.mapbox.navigation.base.route.RouterFailure
+import com.mapbox.navigation.base.route.RouterOrigin
+
 
 fun PlaceAutocompleteResult.toBookmarkPlace() = BookmarkPlace(
     mapboxID = this.id,
@@ -70,19 +83,21 @@ fun MapScreen(mainViewModel:MainViewModel,
               routeLineApi: MapboxRouteLineApi,
               routeLineView: MapboxRouteLineView,
               selectedPlace: PlaceAutocompleteResult?,
-              onFavoriteToggle: (PlaceAutocompleteResult) -> Unit = {},
-              onNavigateClick: (PlaceAutocompleteResult) -> Unit = {}
+              userLocation: Point?
 ) {
     val context = LocalContext.current
 
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
-            zoom(7.0)
-            center(Point.fromLngLat(-63.35, 44.65))
+            zoom(12.0)
+            center(Point.fromLngLat(userLocation!!.longitude(), userLocation!!.latitude()))
             pitch(0.0)
             bearing(0.0)
         }
     }
+    val mapboxNavigation = MapboxNavigationApp.current()
+    val currentLocation = navigationObserver.location
+    var mapViewRef: MapView? by remember { mutableStateOf(null) }
 
     LaunchedEffect(selectedPlace) {
         selectedPlace?.let { place ->
@@ -94,11 +109,71 @@ fun MapScreen(mainViewModel:MainViewModel,
             )
         }
     }
+
+    fun fetchAndDrawRoute(origin:Point, destination:Point){
+        val mapboxNavigation = MapboxNavigationApp.current() ?: return
+        val routeOptions = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .coordinates(origin = origin, destination = destination)
+            .alternatives(true)
+            .build()
+
+        mapboxNavigation.requestRoutes(routeOptions, object : NavigationRouterCallback {
+            override fun onRoutesReady(routes: List<NavigationRoute>, @RouterOrigin routerOrigin: String) {
+                routeLineApi.setNavigationRoutes(routes, emptyList()) { drawData ->
+                    mapViewRef?.getMapboxMap()?.getStyle()?.apply {
+                        routeLineView.renderRouteDrawData(this, drawData)
+                    }
+                }
+                val route = routes.firstOrNull() ?: return
+                val polyline = route.directionsRoute.geometry() ?: return
+                val routePoints = com.mapbox.geojson.LineString
+                    .fromPolyline(polyline, 6)
+                    .coordinates()
+
+                val mapboxMap = mapViewRef?.getMapboxMap() ?: return
+
+
+                val cameraForRoute = mapboxMap.cameraForCoordinates(
+                    coordinates = routePoints,
+                    camera = CameraOptions.Builder()
+                        .padding(com.mapbox.maps.EdgeInsets(100.0, 100.0, 100.0, 100.0))
+                        .build(),
+                    coordinatesPadding = null,
+                    maxZoom = null,
+                    offset = null
+                )
+
+                // Animate camera to that position
+                mapViewportState.easeTo(
+                    cameraOptions = cameraForRoute
+                )
+            }
+
+            override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
+                Log.e("MapScreen", "Route request failed: $reasons")
+            }
+
+            override fun onCanceled(routeOptions: RouteOptions, @RouterOrigin routerOrigin: String) {
+                Log.w("MapScreen", "Route request canceled")
+            }
+        })
+    }
     Box(modifier = Modifier.fillMaxSize()) {
-        
+
         MapboxMap(
             modifier = Modifier.fillMaxSize(),
             mapViewportState = mapViewportState,
+            style = {
+                MapboxStandardStyle(
+                    standardStyleState = rememberStandardStyleState {
+                        configurationsState.apply {
+                            lightPreset = LightPresetValue.DAWN
+                            showPointOfInterestLabels = BooleanValue(true)
+                        }
+                    }
+                )
+            }
         ) {
             selectedPlace?.let { place ->
                 Marker(
@@ -109,6 +184,7 @@ fun MapScreen(mainViewModel:MainViewModel,
                 )
             }
             MapEffect(Unit) { mapView ->
+                mapViewRef = mapView
                 mapView.location.updateSettings {
                     locationPuck = createDefault2DPuck(withBearing = true)
                     enabled = true
@@ -116,43 +192,6 @@ fun MapScreen(mainViewModel:MainViewModel,
                     puckBearingEnabled = true
                 }
                 mapViewportState.transitionToFollowPuckState()
-
-                val routesObserver = object : RoutesObserver {
-                    override fun onRoutesChanged(result: RoutesUpdatedResult) {
-                        // Ensure the map style is available
-                        mapView.mapboxMap.style?.let { mapStyle ->
-
-                            // Optional: get metadata for alternative routes
-                            val alternativesMetadata = MapboxNavigationApp.current()?.getAlternativeMetadataFor(
-                                result.navigationRoutes
-                            ) ?: emptyList()
-
-                            // Pass the routes to the API
-                            routeLineApi.setNavigationRoutes(
-                                result.navigationRoutes,
-                                alternativesMetadata
-                            ) { routeDrawData ->
-                                // Render the route line on the map
-                                routeLineView.renderRouteDrawData(mapStyle, routeDrawData)
-                            }
-                        }
-                    }
-                }
-                // Register RoutesObserver
-                MapboxNavigationApp.current()?.registerRoutesObserver(routesObserver)
-
-
-                val routeProgressObserver = RouteProgressObserver { routeProgress ->
-                    mapView.mapboxMap.style?.let { mapStyle ->
-                        routeLineApi.updateWithRouteProgress(routeProgress) { result ->
-                            routeLineView.renderRouteLineUpdate(mapStyle, result)
-                        }
-                    }
-                }
-
-                // Register both observers
-                MapboxNavigationApp.current()?.registerRoutesObserver(routesObserver)
-                MapboxNavigationApp.current()?.registerRouteProgressObserver(routeProgressObserver)
             }
         }
 
@@ -170,17 +209,21 @@ fun MapScreen(mainViewModel:MainViewModel,
             PlaceCard(
                 place = selectedPlace,
                 isBookmarked = isBookmarked.value,
-                onFavoriteToggle = { CoroutineScope(Dispatchers.IO).launch {
-                    selectedPlace?.let { place ->
-                        if (isBookmarked.value) {
-                            dao.removeBookmark(place.toBookmarkPlace())
-                        } else {
-                            dao.addBookmark(place.toBookmarkPlace())
+                onFavoriteToggle = {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        selectedPlace?.let { place ->
+                            if (isBookmarked.value) {
+                                dao.removeBookmark(place.toBookmarkPlace())
+                            } else {
+                                dao.addBookmark(place.toBookmarkPlace())
+                            }
+                            isBookmarked.value = !isBookmarked.value
                         }
-                        isBookmarked.value = !isBookmarked.value
                     }
-                } },
-                onNavigateClick = { onNavigateClick(selectedPlace) },
+                },
+                fetchRoute = { origin, destination ->
+                    fetchAndDrawRoute(origin, destination)
+                },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(16.dp)
@@ -194,10 +237,14 @@ fun PlaceCard(
     place: PlaceAutocompleteResult,
     isBookmarked: Boolean,
     onFavoriteToggle: () -> Unit,
-    onNavigateClick: () -> Unit,
+    fetchRoute: (Point, Point) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val currentLoc by navigationObserver.location.collectAsState(
+        initial = navigationObserver.getLastKnownLocation()
+    )
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(8.dp),
@@ -206,7 +253,7 @@ fun PlaceCard(
             Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .clickable{isExpanded = !isExpanded},
+                .clickable { isExpanded = !isExpanded },
             horizontalAlignment = Alignment.CenterHorizontally
 
         ) {
@@ -241,7 +288,7 @@ fun PlaceCard(
                 ) {
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        text = "ETA: ${place.etaMinutes} min- Distance: ${place.distanceMeters}m",
+                        text = "Distance: ${place.distanceMeters}m",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center
@@ -257,8 +304,17 @@ fun PlaceCard(
                         Text(
                             if (isBookmarked) "Remove from Bookmarks" else "Add to Bookmarks")
                     }
-                    OutlinedButton(onClick = onNavigateClick) {
-                        Text("Show me the Way!")
+                    OutlinedButton(onClick = {
+                        coroutineScope.launch {
+                            currentLoc?.let { loc ->
+                                val origin = Point.fromLngLat(loc.longitude, loc.latitude)
+                                val destination = place.coordinate
+                                fetchRoute(origin, destination)
+                            }
+                        }
+                    })
+                    {
+                        Text(if (currentLoc != null) "Show me the Way!" else "Waiting for GPS…")
                     }
 
                 }
@@ -266,4 +322,3 @@ fun PlaceCard(
         }
     }
 }
-

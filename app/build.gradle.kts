@@ -70,34 +70,37 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     //Mapbox
-    implementation("com.mapbox.maps:android-ndk27:11.16.4")
-    implementation("com.mapbox.extension:maps-compose-ndk27:11.16.4")
+    implementation("com.mapbox.maps:android:11.16.4")
+    implementation("com.mapbox.extension:maps-compose:11.16.4")
 
-    //Mapbox Searchbox
-    implementation("com.mapbox.search:place-autocomplete-ndk27:2.16.6")
-    implementation("com.mapbox.search:discover-ndk27:2.16.6")
-    implementation("com.mapbox.search:autofill-ndk27:2.16.6")
-    implementation("com.mapbox.search:mapbox-search-android-ui-ndk27:2.16.6")
-    implementation("com.mapbox.search:mapbox-search-android-ndk27:2.16.6")
+    //Mapbox Searchbar
+    implementation("com.mapbox.search:place-autocomplete:2.16.6")
+    implementation("com.mapbox.search:discover:2.16.6")
+    implementation("com.mapbox.search:autofill:2.16.6")
+    implementation("com.mapbox.search:mapbox-search-android-ui:2.16.6")
+    implementation("com.mapbox.search:mapbox-search-android:2.16.6")
 
     //Mapbox Navigation
-    implementation("com.mapbox.navigationcore:android-ndk27:3.17.0-rc.2")
-    implementation("com.mapbox.navigationcore:ui-components-ndk27:3.17.0-rc.2")
-    implementation("com.mapbox.navigationcore:ui-maps-ndk27:3.17.0-rc.2")
+    implementation("com.mapbox.navigationcore:android:3.17.0")
+    implementation("com.mapbox.navigationcore:navigation:3.17.0")
+    implementation("com.mapbox.navigationcore:tripdata:3.17.0")
+    implementation("com.mapbox.navigationcore:ui-components:3.17.0")
+    implementation("com.mapbox.navigationcore:ui-maps:3.17.0")
+
 
     //Gif splash
     implementation("androidx.core:core-splashscreen:1.0.0")
     implementation("com.github.bumptech.glide:glide:4.12.0")
 
     //Room
-    val room_version = "2.8.4"
-    implementation("androidx.room:room-runtime:$room_version")
-    ksp("androidx.room:room-compiler:$room_version")
-    implementation("androidx.room:room-ktx:${room_version}")
-    implementation("androidx.room:room-rxjava2:${room_version}")
-    implementation("androidx.room:room-rxjava3:${room_version}")
-    implementation("androidx.room:room-guava:${room_version}")
-    testImplementation("androidx.room:room-testing:${room_version}")
-    implementation("androidx.room:room-paging:${room_version}")
+    val roomVersion = "2.8.4"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
+    implementation("androidx.room:room-ktx:${roomVersion}")
+    implementation("androidx.room:room-rxjava2:${roomVersion}")
+    implementation("androidx.room:room-rxjava3:${roomVersion}")
+    implementation("androidx.room:room-guava:${roomVersion}")
+    testImplementation("androidx.room:room-testing:${roomVersion}")
+    implementation("androidx.room:room-paging:${roomVersion}")
 
 }

@@ -1,7 +1,8 @@
 <h1>Welcome to PlotPoints</h1>
-![MapPage](https://github.com/user-attachments/assets/0080dc2b-3e67-4225-8f24-0f245fa52a87)
-![BookmarksPage](https://github.com/user-attachments/assets/fe13787f-86b6-42ec-95f1-fb1a4c997d46)
-
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/b7110c54-fc5f-4adf-82c2-222de4394226" alt="MapPage" width="30%" style="margin-right: 10px;">
+  <img src="https://github.com/user-attachments/assets/fe13787f-86b6-42ec-95f1-fb1a4c997d46" alt="BookmarksPage" width="30%" style="margin-right: 10px;">
+</div>
 <h2>Help Navigate to your next Book Crawl</h2>
 <p>Over the summer, I enjoyed going on "book crawls", where I would go to various cafes or parks and read my book, thus getting out to enjoy a good walk and explore my city, as well as get some reading in. This app was made to help find places to go on such adventures!</p>
 
@@ -16,3 +17,4 @@ It also features the following icons:
 <a href="https://www.flaticon.com/free-icons/search" title="search icons">Search icons created by Freepik - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/treasure-map" title="treasure map icons">Treasure map icons created by Freepik - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/book" title="book icons">Book icons created by mikan933 - Flaticon</a>
+
